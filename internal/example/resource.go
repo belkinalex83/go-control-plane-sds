@@ -26,10 +26,16 @@ import (
 	route "github.com/envoyproxy/go-control-plane/envoy/config/route/v3"
 	router "github.com/envoyproxy/go-control-plane/envoy/extensions/filters/http/router/v3"
 	hcm "github.com/envoyproxy/go-control-plane/envoy/extensions/filters/network/http_connection_manager/v3"
+	auth "github.com/envoyproxy/go-control-plane/envoy/extensions/transport_sockets/tls/v3"
 	"github.com/envoyproxy/go-control-plane/pkg/cache/types"
 	"github.com/envoyproxy/go-control-plane/pkg/cache/v3"
 	"github.com/envoyproxy/go-control-plane/pkg/resource/v3"
 	"github.com/envoyproxy/go-control-plane/pkg/wellknown"
+)
+
+var (
+    version int32
+	tlsName = "envoydomain.dev"
 )
 
 const (
@@ -168,12 +174,28 @@ func makeConfigSource() *core.ConfigSource {
 	return source
 }
 
+func makeSecret(tlsName string) *auth.Secret {
+	return &auth.Secret{
+        Name: tlsName,
+        Type: &auth.Secret_TlsCertificate{
+            TlsCertificate: &auth.TlsCertificate{
+                PrivateKey: &core.DataSource{
+                    Specifier: &core.DataSource_Filename{Filename: "./envoy/certs/key.pem"},
+                },
+                CertificateChain: &core.DataSource{
+                    Specifier: &core.DataSource_Filename{Filename: "./envoy/certs/cert.pem"},
+                },
+            },       },
+	}
+}
+
 func GenerateSnapshot() *cache.Snapshot {
 	snap, _ := cache.NewSnapshot("1",
 		map[resource.Type][]types.Resource{
 			resource.ClusterType:  {makeCluster(ClusterName)},
 			resource.RouteType:    {makeRoute(RouteName, ClusterName)},
 			resource.ListenerType: {makeHTTPListener(ListenerName, RouteName)},
+			resource.SecretType:   {makeSecret(tlsName)},
 		},
 	)
 	return snap
