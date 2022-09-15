@@ -25,4 +25,4 @@ After successful operation you can find a new certificate and key in `./envoy/ce
 
 * [resource.go](internal/example/resource.go) generates a `Snapshot` structure which describes the configuration that the SDS server serves to Envoy.
 * [bootstrap-xds.yaml](sample/bootstrap-xds.yaml) Envoy configuration
-* [acme_cert.py](acme_cert.py) Python realization of automate task for obtaining certificates via Let's encrypt (ACME v2 staging environment)
+* [acme_cert.py](acme_cert.py) Python realization of obtaining certificates via Let's encrypt (ACME v2 staging environment)
